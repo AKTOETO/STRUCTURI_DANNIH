@@ -120,7 +120,7 @@ Node<T>* create_tree(T* arr, int size)
 template<class T>
 void node_print(Node<T>* _node)
 {
-	cout << _node->m_data << " -> ";
+	cout << _node->m_data << " ";
 }
 
 // удаление элемента дерева
@@ -265,6 +265,27 @@ int tree_calculate_nodes(Node<T>* _root)
 		) + 1;
 }
 
+// нахождение минимального элемента в дереве
+template<class T>
+Node<T>* tree_find_min(Node<T>* _root)
+{
+	// если это самый низкий элемент в данной ветке
+	if (!_root->m_left && !_root->m_right)
+		return _root;
+
+	return tree_find_min(_root->m_left);
+}
+
+// нахождение максимального элемента в дереве
+template<class T>
+Node<T>* tree_find_max(Node<T>* _root)
+{
+	// если это самый низкий элемент в данной ветке
+	if (!_root->m_left && !_root->m_right)
+		return _root;
+
+	return tree_find_max(_root->m_right);
+}
 
 int main()
 {
@@ -273,12 +294,12 @@ int main()
 	// ДЛЯ ТЕСТОВ
 
 	//char* mass = new char [5] { 'a', 'c', 'B', 'd', 'A' };
-	int* mass = new int [5] { 50, 30, 20, 40, 60 };
-	//int* mass = new int [10] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98 };
+	//int* mass = new int [5] { 50, 30, 20, 40, 60 };
+	int* mass = new int [10] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98 };
 	//int* mass = new int [9] { 20, 10, 35, 15, 17, 27, 24, 8, 30 };
 	//int* mass = new int [5] { 50, 30, 50, 40, 600 };
 
-	Node<int>* root = create_tree(mass, 5);
+	Node<int>* root = create_tree(mass, 10);
 
 	cout << "inorder: ";
 	inorder(root, node_print);
@@ -307,6 +328,9 @@ int main()
 
 	cout << "число узлов в левом поддереве: " << tree_calculate_nodes(root->m_left) << endl;
 	cout << "число узлов в правом поддереве: " << tree_calculate_nodes(root->m_right) << endl;
+
+	cout << "минимальный элемент: " << tree_find_min(root)->m_data << endl;
+	cout << "максимальный элемент: " << tree_find_max(root)->m_data << endl;
 
 	tree_delete(root);
 
