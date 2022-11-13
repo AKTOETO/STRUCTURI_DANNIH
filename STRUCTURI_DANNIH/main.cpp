@@ -67,7 +67,7 @@ struct Node
 
 // вставка элемента в дерево
 template<class T>
-Node<T>* node_insert(Node<T>* _root, T _key)
+Node<T>* tree_insert_node(Node<T>* _root, T _key)
 {
 	// если текущий элемент пуст
 	if (!_root)
@@ -84,13 +84,13 @@ Node<T>* node_insert(Node<T>* _root, T _key)
 	if (_key < _root->m_data)
 	{
 		// идем влево
-		_root->m_left = node_insert(_root->m_left, _key);
+		_root->m_left = tree_insert_node(_root->m_left, _key);
 	}
 	// если ключ больше ключа текущего элемента
 	else if (_key > _root->m_data)
 	{
 		// идем вправо
-		_root->m_right = node_insert(_root->m_right, _key);
+		_root->m_right = tree_insert_node(_root->m_right, _key);
 	}
 
 	// возвращаем корень дерева
@@ -99,7 +99,7 @@ Node<T>* node_insert(Node<T>* _root, T _key)
 
 // создание дерева из массива
 template<class T>
-Node<T>* create_tree(T* arr, int size)
+Node<T>* tree_create(T* arr, int size)
 {
 	// объявление переменной списка
 	Node<T>* root = nullptr;
@@ -107,7 +107,7 @@ Node<T>* create_tree(T* arr, int size)
 	// заполнение дерева значениями
 	for (int i = 0; i < size; i++)
 	{
-		root = node_insert(root, arr[i]);
+		root = tree_insert_node(root, arr[i]);
 	}
 
 	INFO("CREATE_TREE: дерево создано");
@@ -188,7 +188,7 @@ void tree_delete(Node<T>*& _root)
 	if (_root)
 	{
 		// удаляем его
-		postorder(_root, node_delete);
+		postorder(_root, node_delete/*[](Node<T>* _node) { delete _node; }*/);
 		_root = nullptr;
 		INFO("TREE_DELETE: дерево удалено");
 	}
@@ -229,7 +229,7 @@ Node<T>* tree_find_node(Node<T>* _root, T _key)
 
 // нахождение высоты дерева
 template<class T>
-int tree_calculate_height(Node<T>* _root)
+int tree_count_height(Node<T>* _root)
 {
 	// если элемент не существует
 	if (!_root)
@@ -241,14 +241,14 @@ int tree_calculate_height(Node<T>* _root)
 
 	// возвращаем максимальное значение из двух ветвей + 1
 	return max(
-		tree_calculate_height(_root->m_left),
-		tree_calculate_height(_root->m_right)
+		tree_count_height(_root->m_left),
+		tree_count_height(_root->m_right)
 	) + 1;
 }
 
 // нахождение количества узлов
 template<class T>
-int tree_calculate_nodes(Node<T>* _root)
+int tree_count_nodes(Node<T>* _root)
 {
 	// если элемент не существует
 	if (!_root)
@@ -260,8 +260,8 @@ int tree_calculate_nodes(Node<T>* _root)
 
 	// возвращаем сумму значений из двух ветвей + 1
 	return (
-		tree_calculate_nodes(_root->m_left) +
-		tree_calculate_nodes(_root->m_right)
+		tree_count_nodes(_root->m_left) +
+		tree_count_nodes(_root->m_right)
 		) + 1;
 }
 
@@ -269,22 +269,73 @@ int tree_calculate_nodes(Node<T>* _root)
 template<class T>
 Node<T>* tree_find_min(Node<T>* _root)
 {
-	// если это самый низкий элемент в данной ветке
-	if (!_root->m_left && !_root->m_right)
-		return _root;
+	Node<T>* current = _root;
 
-	return tree_find_min(_root->m_left);
+	// идем по левой ветке, пока не дойдем до конца
+	while (current && current->m_left)
+	{
+		current = current->m_left;
+	}
+
+	return current;
 }
 
 // нахождение максимального элемента в дереве
 template<class T>
 Node<T>* tree_find_max(Node<T>* _root)
 {
-	// если это самый низкий элемент в данной ветке
-	if (!_root->m_left && !_root->m_right)
-		return _root;
+	Node<T>* current = _root;
 
-	return tree_find_max(_root->m_right);
+	// идем по правой ветке, пока не дойдем до конца
+	while (current && current->m_right)
+	{
+		current = current->m_right;
+	}
+
+	return current;
+}
+
+// удаление элемента дерева
+template<class T>
+Node<T>* tree_node_delete(Node<T>* _root, T _key)
+{
+	// ищем узел 
+	Node<T>* to_find = tree_find_node(_root, _key);
+	Node<T>* temp;
+
+	// если элемент не был найден
+	if (!to_find) return to_find;
+
+	// если у удаляемого элемента нет дочерних
+	// элементов или один дочерний элемент
+	if (!to_find->m_left)
+	{
+		// создание временного элемента
+		temp = to_find->m_right;
+		delete to_find;
+		//return temp;
+	}
+	else if (!to_find->m_right)
+	{
+		// создание временного элемента
+		temp = to_find->m_left;
+		delete to_find;
+		//return temp;
+	}
+	else
+	{
+		// если у удаляемого элемента есть
+		// оба дочерних элемента
+		temp = tree_find_min(_root->m_right);
+	}
+
+	// помещаем найденный элемент temp в корень дерева
+	_root->m_data = temp->m_data;
+
+	// удаляем из дерева элемент
+	_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
+
+	return _root;
 }
 
 int main()
@@ -295,11 +346,12 @@ int main()
 
 	//char* mass = new char [5] { 'a', 'c', 'B', 'd', 'A' };
 	//int* mass = new int [5] { 50, 30, 20, 40, 60 };
-	int* mass = new int [10] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98 };
+	//int* mass = new int [10] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98 };
+	int* mass = new int [6] { 80,52,48,71,63,67 };
 	//int* mass = new int [9] { 20, 10, 35, 15, 17, 27, 24, 8, 30 };
 	//int* mass = new int [5] { 50, 30, 50, 40, 600 };
 
-	Node<int>* root = create_tree(mass, 10);
+	Node<int>* root = tree_create(mass, 6);
 
 	cout << "inorder: ";
 	inorder(root, node_print);
@@ -322,15 +374,22 @@ int main()
 		cout << "найденный элемент: " << to_found->m_data << endl;
 	}
 
-	cout << "количество узлов дерева: " << tree_calculate_nodes(root) << endl;
+	cout << "количество узлов дерева: " << tree_count_nodes(root) << endl;
 
-	cout << "высота дерева: " << tree_calculate_height(root) << endl;
+	cout << "высота дерева: " << tree_count_height(root) << endl;
 
-	cout << "число узлов в левом поддереве: " << tree_calculate_nodes(root->m_left) << endl;
-	cout << "число узлов в правом поддереве: " << tree_calculate_nodes(root->m_right) << endl;
+	cout << "число узлов в левом поддереве: " << tree_count_nodes(root->m_left) << endl;
+	cout << "число узлов в правом поддереве: " << tree_count_nodes(root->m_right) << endl;
 
 	cout << "минимальный элемент: " << tree_find_min(root)->m_data << endl;
 	cout << "максимальный элемент: " << tree_find_max(root)->m_data << endl;
+
+	root = tree_node_delete(root, 71);
+
+	cout << "inorder: ";
+	inorder(root, node_print);
+	cout << endl;
+	cout << endl;
 
 	tree_delete(root);
 
