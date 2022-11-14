@@ -188,7 +188,7 @@ void tree_delete(Node<T>*& _root)
 	if (_root)
 	{
 		// удаляем его
-		postorder(_root, node_delete/*[](Node<T>* _node) { delete _node; }*/);
+		postorder(_root, node_delete);
 		_root = nullptr;
 		INFO("TREE_DELETE: дерево удалено");
 	}
@@ -338,6 +338,22 @@ Node<T>* tree_node_delete(Node<T>* _root, T _key)
 	return _root;
 }
 
+// печать дерева
+template<class T>
+void tree_print(Node<T>* _root, int _lvl = 0)
+{
+	if (_root)
+	{
+		tree_print(_root->m_right, _lvl + 1);
+		for (int i = 0; i < _lvl; i++)
+		{
+			cout << "\t";
+		}
+		cout << _root->m_data << endl;
+		tree_print(_root->m_left, _lvl + 1);
+	}
+}
+
 int main()
 {
 	setlocale(LC_ALL, "ru");
@@ -346,12 +362,12 @@ int main()
 
 	//char* mass = new char [5] { 'a', 'c', 'B', 'd', 'A' };
 	//int* mass = new int [5] { 50, 30, 20, 40, 60 };
-	//int* mass = new int [10] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98 };
-	int* mass = new int [6] { 80,52,48,71,63,67 };
+	int* mass = new int [10] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98 };
+	//int* mass = new int [6] { 80,52,48,71,63,67 };
 	//int* mass = new int [9] { 20, 10, 35, 15, 17, 27, 24, 8, 30 };
 	//int* mass = new int [5] { 50, 30, 50, 40, 600 };
 
-	Node<int>* root = tree_create(mass, 6);
+	Node<int>* root = tree_create(mass, 10);
 
 	cout << "inorder: ";
 	inorder(root, node_print);
@@ -384,7 +400,9 @@ int main()
 	cout << "минимальный элемент: " << tree_find_min(root)->m_data << endl;
 	cout << "максимальный элемент: " << tree_find_max(root)->m_data << endl;
 
-	root = tree_node_delete(root, 71);
+	//root = tree_node_delete(root, 71);
+
+	tree_print(root);
 
 	cout << "inorder: ";
 	inorder(root, node_print);
