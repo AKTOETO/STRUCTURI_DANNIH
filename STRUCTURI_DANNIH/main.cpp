@@ -191,7 +191,6 @@ T input_and_check(bool(*_comp)(T),
 	= "Было введено некорректное значение");
 
 // функция ведения диалога с пользователем
-template<typename T = char>
 void dialog();
 
 /****************************************************************
@@ -611,20 +610,19 @@ T input_and_check(bool(*_comp)(T),
 }
 
 // функция ведения диалога с пользователем
-template<typename T = char>
 void dialog()
 {
 	// переменная содержащая коды действий
 	input_codes in_code;
 
 	// элемент для вставки
-	T symb;
+	char symb;
 
 	// переменная корня
-	node<T>* root = nullptr;
+	node<char>* root = nullptr;
 
 	// элемент для поиска max и min в дереве
-	node<T>* elem = nullptr;
+	node<char>* elem = nullptr;
 
 	/* коды комманд
 	exit,								1
