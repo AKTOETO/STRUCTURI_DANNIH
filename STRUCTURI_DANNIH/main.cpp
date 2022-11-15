@@ -19,14 +19,18 @@
 *	T – тип ключей, D – диапазон изменения значений ключей.				*
 \***********************************************************************/
 #include <iostream>
+#include <iomanip>
 
 using namespace std;
 
 // если нужна печать по каждому действию
-#define NEED_PRINT_DEBUG 0
+#define NEED_PRINT_DEBUG 1
 
 // вывод в консоль сообщения
 #define INFO(str) if(NEED_PRINT_DEBUG)cout<<"\t"<<str<<"\n";
+
+// множитель ширины вывода дерева
+#define WIDTH_MULT_PRINT 4
 
 
 // элемент дерева
@@ -45,12 +49,6 @@ struct Node
 
 	Node(T _data)
 		:m_left(nullptr), m_right(nullptr), m_data(_data)
-	{
-		INFO("NODE: элемент создан");
-	};
-
-	Node(T _data, Node* _left, Node* _right)
-		:m_left(_left), m_right(_right), m_data(_data)
 	{
 		INFO("NODE: элемент создан");
 	};
@@ -75,7 +73,7 @@ Node<T>* tree_insert_node(Node<T>* _root, T _key)
 		// создаем новый элемент
 		Node<T>* new_node = new Node<T>(_key);
 
-		INFO("NODE_INSERT: элемент вставлен");
+		INFO("INSERT: элемент вставлен");
 
 		// возвращаем его
 		return new_node;
@@ -92,8 +90,6 @@ Node<T>* tree_insert_node(Node<T>* _root, T _key)
 		// идем вправо
 		_root->m_right = tree_insert_node(_root->m_right, _key);
 	}
-
-	// возвращаем корень дерева
 	return _root;
 }
 
@@ -350,12 +346,13 @@ void tree_print(Node<T>* _root, int _lvl = 0)
 	{
 		// вывод правого поддерева
 		tree_print(_root->m_right, _lvl + 1);
-		for (int i = 0; i < _lvl; i++)
-		{
-			cout << "\t";
-		}
+
+		// вывод количества сдвигов
+		cout << fixed << setw(_lvl * WIDTH_MULT_PRINT) << setfill(' ') << ' ';
+
 		// вывод корня
 		cout << _root->m_data << endl;
+
 		// вывод левого поддерева
 		tree_print(_root->m_left, _lvl + 1);
 	}
@@ -369,12 +366,13 @@ int main()
 
 	//char* mass = new char [5] { 'a', 'c', 'B', 'd', 'A' };
 	//int* mass = new int [5] { 50, 30, 20, 40, 60 };
-	int* mass = new int [10] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98 };
+	//int* mass = new int [10] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98 };
+	int* mass = new int [20] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98, 51, 31, 21, 41, 61, 46, 56, 33, 13, 99 };
 	//int* mass = new int [6] { 80,52,48,71,63,67 };
 	//int* mass = new int [9] { 20, 10, 35, 15, 17, 27, 24, 8, 30 };
 	//int* mass = new int [5] { 50, 30, 50, 40, 600 };
 
-	Node<int>* root = tree_create(mass, 10);
+	Node<int>* root = tree_create(mass, 20);
 	//Node<int>* root = nullptr;
 	//root = tree_insert_node(root, 2);
 
@@ -414,8 +412,7 @@ int main()
 	root = tree_node_delete(root, 60);
 	root = tree_node_delete(root, 40);
 	root = tree_node_delete(root, 12);
-
-
+	root = tree_insert_node(root, 500);
 
 	cout << "количество узлов дерева: " << tree_count_nodes(root) << endl;
 
