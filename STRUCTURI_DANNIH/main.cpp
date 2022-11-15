@@ -299,43 +299,78 @@ Node<T>* tree_find_max(Node<T>* _root)
 template<class T>
 Node<T>* tree_node_delete(Node<T>* _root, T _key)
 {
-	// ищем узел 
-	Node<T>* to_find = tree_find_node(_root, _key);
-	Node<T>* temp;
+	// Возвращаем, если дерево пустое
+	if (!_root) return _root;
 
-	// если элемент не был найден
-	if (!to_find) return to_find;
+	// Ищем узел, который хотим удалить
+	if (_key < _root->m_data)
+		_root->m_left = tree_node_delete(_root->m_left, _key);
+	else if (_key > _root->m_data)
+		_root->m_right = tree_node_delete(_root->m_right, _key);
+	else {
+		// Если у узла один дочерний элемент или их нет
+		if (_root->m_left == NULL) {
+			Node<T>* temp = _root->m_right;
+			delete _root;
+			return temp;
+		}
+		else if (_root->m_right == NULL) {
+			Node<T>* temp = _root->m_left;
+			delete _root;
+			return temp;
+		}
 
-	// если у удаляемого элемента нет дочерних
-	// элементов или один дочерний элемент
-	if (!to_find->m_left)
-	{
-		// создание временного элемента
-		temp = to_find->m_right;
-		delete to_find;
-		//return temp;
+		// Если у узла два дочерних элемента
+		Node<T>* temp = tree_find_min(_root->m_right);
+
+		// Помещаем inorder-преемника на место узла, который хотим удалить
+		_root->m_data = temp->m_data;
+
+		// Удаляем inorder-преемника
+		_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
 	}
-	else if (!to_find->m_right)
-	{
-		// создание временного элемента
-		temp = to_find->m_left;
-		delete to_find;
-		//return temp;
-	}
-	else
-	{
-		// если у удаляемого элемента есть
-		// оба дочерних элемента
-		temp = tree_find_min(_root->m_right);
-	}
-
-	// помещаем найденный элемент temp в корень дерева
-	_root->m_data = temp->m_data;
-
-	// удаляем из дерева элемент
-	_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
-
 	return _root;
+
+
+	// НЕ РАБОТАЕТ
+
+	//// ищем узел 
+	//Node<T>* to_find = tree_find_node(_root, _key);
+	//Node<T>* temp;
+
+	//// если элемент не был найден
+	//if (!to_find) return to_find;
+
+	//// если у удаляемого элемента нет дочерних
+	//// элементов или один дочерний элемент
+	//if (!to_find->m_left)
+	//{
+	//	// создание временного элемента
+	//	temp = to_find->m_right;
+	//	delete to_find;
+	//	//return temp;
+	//}
+	//else if (!to_find->m_right)
+	//{
+	//	// создание временного элемента
+	//	temp = to_find->m_left;
+	//	delete to_find;
+	//	//return temp;
+	//}
+	//else
+	//{
+	//	// если у удаляемого элемента есть
+	//	// оба дочерних элемента
+	//	temp = tree_find_min(_root->m_right);
+	//}
+
+	//// помещаем найденный элемент temp в корень дерева
+	//_root->m_data = temp->m_data;
+
+	//// удаляем из дерева элемент
+	//_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
+
+	//return _root;
 }
 
 int main()
@@ -352,6 +387,8 @@ int main()
 	//int* mass = new int [5] { 50, 30, 50, 40, 600 };
 
 	Node<int>* root = tree_create(mass, 6);
+	//Node<int>* root = nullptr;
+	//root = tree_insert_node(root, 2);
 
 	cout << "inorder: ";
 	inorder(root, node_print);
@@ -384,6 +421,7 @@ int main()
 	cout << "минимальный элемент: " << tree_find_min(root)->m_data << endl;
 	cout << "максимальный элемент: " << tree_find_max(root)->m_data << endl;
 
+	//не работает
 	root = tree_node_delete(root, 71);
 
 	cout << "inorder: ";
