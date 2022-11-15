@@ -330,47 +330,6 @@ Node<T>* tree_node_delete(Node<T>* _root, T _key)
 		_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
 	}
 	return _root;
-
-
-	// НЕ РАБОТАЕТ
-
-	//// ищем узел 
-	//Node<T>* to_find = tree_find_node(_root, _key);
-	//Node<T>* temp;
-
-	//// если элемент не был найден
-	//if (!to_find) return to_find;
-
-	//// если у удаляемого элемента нет дочерних
-	//// элементов или один дочерний элемент
-	//if (!to_find->m_left)
-	//{
-	//	// создание временного элемента
-	//	temp = to_find->m_right;
-	//	delete to_find;
-	//	//return temp;
-	//}
-	//else if (!to_find->m_right)
-	//{
-	//	// создание временного элемента
-	//	temp = to_find->m_left;
-	//	delete to_find;
-	//	//return temp;
-	//}
-	//else
-	//{
-	//	// если у удаляемого элемента есть
-	//	// оба дочерних элемента
-	//	temp = tree_find_min(_root->m_right);
-	//}
-
-	//// помещаем найденный элемент temp в корень дерева
-	//_root->m_data = temp->m_data;
-
-	//// удаляем из дерева элемент
-	//_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
-
-	//return _root;
 }
 
 int main()
