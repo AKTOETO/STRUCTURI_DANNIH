@@ -188,7 +188,7 @@ void tree_delete(Node<T>*& _root)
 	if (_root)
 	{
 		// удаляем его
-		postorder(_root, node_delete/*[](Node<T>* _node) { delete _node; }*/);
+		postorder(_root, node_delete);
 		_root = nullptr;
 		INFO("TREE_DELETE: дерево удалено");
 	}
@@ -326,10 +326,61 @@ Node<T>* tree_node_delete(Node<T>* _root, T _key)
 		// Помещаем inorder-преемника на место узла, который хотим удалить
 		_root->m_data = temp->m_data;
 
-		// Удаляем inorder-преемника
-		_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
+	_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
+
+	//// ищем узел 
+	//Node<T>* to_find = tree_find_node(_root, _key);
+	//Node<T>* temp;
+
+	//// если элемент не был найден
+	//if (!to_find) return to_find;
+
+	//// если у удаляемого элемента нет дочерних
+	//// элементов или один дочерний элемент
+	//if (!to_find->m_left)
+	//{
+	//	// создание временного элемента
+	//	temp = to_find->m_right;
+	//	delete to_find;
+	//	//return temp;
+	//}
+	//else if (!to_find->m_right)
+	//{
+	//	// создание временного элемента
+	//	temp = to_find->m_left;
+	//	delete to_find;
+	//	//return temp;
+	//}
+	//else
+	//{
+	//	// если у удаляемого элемента есть
+	//	// оба дочерних элемента
+	//	temp = tree_find_min(_root->m_right);
+	//}
+
+	//// помещаем найденный элемент temp в корень дерева
+	//_root->m_data = temp->m_data;
+
+	//// удаляем из дерева элемент
+	//_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
+
+	//return _root;
+}
+
+// печать дерева
+template<class T>
+void tree_print(Node<T>* _root, int _lvl = 0)
+{
+	if (_root)
+	{
+		tree_print(_root->m_right, _lvl + 1);
+		for (int i = 0; i < _lvl; i++)
+		{
+			cout << "\t";
+		}
+		cout << _root->m_data << endl;
+		tree_print(_root->m_left, _lvl + 1);
 	}
-	return _root;
 }
 
 int main()
@@ -340,8 +391,8 @@ int main()
 
 	//char* mass = new char [5] { 'a', 'c', 'B', 'd', 'A' };
 	//int* mass = new int [5] { 50, 30, 20, 40, 60 };
-	//int* mass = new int [10] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98 };
-	int* mass = new int [6] { 80,52,48,71,63,67 };
+	int* mass = new int [10] { 50, 30, 20, 40, 60, 45, 55, 32, 12, 98 };
+	//int* mass = new int [6] { 80,52,48,71,63,67 };
 	//int* mass = new int [9] { 20, 10, 35, 15, 17, 27, 24, 8, 30 };
 	//int* mass = new int [5] { 50, 30, 50, 40, 600 };
 
@@ -380,8 +431,12 @@ int main()
 	cout << "минимальный элемент: " << tree_find_min(root)->m_data << endl;
 	cout << "максимальный элемент: " << tree_find_max(root)->m_data << endl;
 
-	//не работает
-	root = tree_node_delete(root, 71);
+	tree_print(root);
+	cout << endl;
+	root = tree_node_delete(root, 45);
+
+	tree_print(root);
+	cout << endl;
 
 	cout << "inorder: ";
 	inorder(root, node_print);
