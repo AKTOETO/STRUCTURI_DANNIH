@@ -304,67 +304,42 @@ Node<T>* tree_node_delete(Node<T>* _root, T _key)
 
 	// Ищем узел, который хотим удалить
 	if (_key < _root->m_data)
+	{
+		// идем на левую ветвь
 		_root->m_left = tree_node_delete(_root->m_left, _key);
+	}
 	else if (_key > _root->m_data)
+	{
+		// идем на правую ветвь
 		_root->m_right = tree_node_delete(_root->m_right, _key);
+	}
+	// если был найден нужный элемент
 	else {
 		// Если у узла один дочерний элемент или их нет
-		if (_root->m_left == NULL) {
+		// если нет левой ветви
+		if (!_root->m_left) {
 			Node<T>* temp = _root->m_right;
 			delete _root;
 			return temp;
 		}
-		else if (_root->m_right == NULL) {
+		// если нет правой ветви
+		else if (!_root->m_right) {
 			Node<T>* temp = _root->m_left;
 			delete _root;
 			return temp;
 		}
 
 		// Если у узла два дочерних элемента
+		// находим минимальный элемент в правой ветви
 		Node<T>* temp = tree_find_min(_root->m_right);
 
-		// Помещаем inorder-преемника на место узла, который хотим удалить
+		// помещаем найденный элемент в тот, который хотим удалить
 		_root->m_data = temp->m_data;
 
-	_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
-
-	//// ищем узел 
-	//Node<T>* to_find = tree_find_node(_root, _key);
-	//Node<T>* temp;
-
-	//// если элемент не был найден
-	//if (!to_find) return to_find;
-
-	//// если у удаляемого элемента нет дочерних
-	//// элементов или один дочерний элемент
-	//if (!to_find->m_left)
-	//{
-	//	// создание временного элемента
-	//	temp = to_find->m_right;
-	//	delete to_find;
-	//	//return temp;
-	//}
-	//else if (!to_find->m_right)
-	//{
-	//	// создание временного элемента
-	//	temp = to_find->m_left;
-	//	delete to_find;
-	//	//return temp;
-	//}
-	//else
-	//{
-	//	// если у удаляемого элемента есть
-	//	// оба дочерних элемента
-	//	temp = tree_find_min(_root->m_right);
-	//}
-
-	//// помещаем найденный элемент temp в корень дерева
-	//_root->m_data = temp->m_data;
-
-	//// удаляем из дерева элемент
-	//_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
-
-	//return _root;
+		// удаляем скопированный элемент из правой ветви дерева
+		_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
+	}
+	return _root;
 }
 
 // печать дерева
@@ -373,12 +348,15 @@ void tree_print(Node<T>* _root, int _lvl = 0)
 {
 	if (_root)
 	{
+		// вывод правого поддерева
 		tree_print(_root->m_right, _lvl + 1);
 		for (int i = 0; i < _lvl; i++)
 		{
 			cout << "\t";
 		}
+		// вывод корня
 		cout << _root->m_data << endl;
+		// вывод левого поддерева
 		tree_print(_root->m_left, _lvl + 1);
 	}
 }
@@ -396,7 +374,7 @@ int main()
 	//int* mass = new int [9] { 20, 10, 35, 15, 17, 27, 24, 8, 30 };
 	//int* mass = new int [5] { 50, 30, 50, 40, 600 };
 
-	Node<int>* root = tree_create(mass, 6);
+	Node<int>* root = tree_create(mass, 10);
 	//Node<int>* root = nullptr;
 	//root = tree_insert_node(root, 2);
 
@@ -415,7 +393,7 @@ int main()
 	cout << endl;
 	cout << endl;
 
-	Node<int>* to_found = tree_find_node(root, 35);
+	Node<int>* to_found = tree_find_node(root, 12);
 	if (to_found)
 	{
 		cout << "найденный элемент: " << to_found->m_data << endl;
@@ -433,7 +411,21 @@ int main()
 
 	tree_print(root);
 	cout << endl;
-	root = tree_node_delete(root, 45);
+	root = tree_node_delete(root, 60);
+	root = tree_node_delete(root, 40);
+	root = tree_node_delete(root, 12);
+
+
+
+	cout << "количество узлов дерева: " << tree_count_nodes(root) << endl;
+
+	cout << "высота дерева: " << tree_count_height(root) << endl;
+
+	cout << "число узлов в левом поддереве: " << tree_count_nodes(root->m_left) << endl;
+	cout << "число узлов в правом поддереве: " << tree_count_nodes(root->m_right) << endl;
+
+	cout << "минимальный элемент: " << tree_find_min(root)->m_data << endl;
+	cout << "максимальный элемент: " << tree_find_max(root)->m_data << endl;
 
 	tree_print(root);
 	cout << endl;
