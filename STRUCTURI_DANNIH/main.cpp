@@ -67,26 +67,26 @@ const char* command_str =
 
 // элемент дерева
 template<class T>
-struct Node
+struct node
 {
 	T m_data;			// ключ
-	Node* m_left;		// указатель на левого потомка
-	Node* m_right;		// указатель на правого потомка
+	node* m_left;		// указатель на левого потомка
+	node* m_right;		// указатель на правого потомка
 
 	// конструкторы
-	Node() :m_left(nullptr), m_right(nullptr), m_data(NULL)
+	node() :m_left(nullptr), m_right(nullptr), m_data(NULL)
 	{
 		INFO("NODE: элемент создан");
 	};
 
-	Node(T _data)
+	node(T _data)
 		:m_left(nullptr), m_right(nullptr), m_data(_data)
 	{
 		INFO("NODE: элемент создан");
 	};
 
 	// деструктор
-	~Node()
+	~node()
 	{
 		m_data = T(NULL);
 		m_left = nullptr;
@@ -97,13 +97,13 @@ struct Node
 
 // вставка элемента в дерево
 template<class T>
-Node<T>* tree_insert_node(Node<T>* _root, T _key)
+node<T>* tree_insert_node(node<T>* _root, T _key)
 {
 	// если текущий элемент пуст
 	if (!_root)
 	{
 		// создаем новый элемент
-		Node<T>* new_node = new Node<T>(_key);
+		node<T>* new_node = new node<T>(_key);
 
 		INFO("INSERT: элемент вставлен");
 
@@ -127,10 +127,10 @@ Node<T>* tree_insert_node(Node<T>* _root, T _key)
 
 // создание дерева из массива
 template<class T>
-Node<T>* tree_create(T* arr, int size)
+node<T>* tree_create(T* arr, int size)
 {
 	// объявление переменной списка
-	Node<T>* root = nullptr;
+	node<T>* root = nullptr;
 
 	// заполнение дерева значениями
 	for (int i = 0; i < size; i++)
@@ -146,21 +146,21 @@ Node<T>* tree_create(T* arr, int size)
 
 // печать элемента дерева
 template<class T>
-void node_print(Node<T>* _node)
+void node_print(node<T>* _node)
 {
 	cout << _node->m_data << " ";
 }
 
 // удаление элемента дерева
 template<class T>
-void node_delete(Node<T>* _node)
+void node_delete(node<T>* _node)
 {
 	delete _node;
 }
 
 // обход дерева симметричный
 template<class T>
-void inorder(Node<T>* _root, void (*_func)(Node<T>*)) {
+void inorder(node<T>* _root, void (*_func)(node<T>*)) {
 	if (_root)
 	{
 		// идем налево
@@ -176,7 +176,7 @@ void inorder(Node<T>* _root, void (*_func)(Node<T>*)) {
 
 // обход дерева прямой
 template<class T>
-void preorder(Node<T>* _root, void (*_func)(Node<T>*))
+void preorder(node<T>* _root, void (*_func)(node<T>*))
 {
 	if (_root)
 	{
@@ -193,7 +193,7 @@ void preorder(Node<T>* _root, void (*_func)(Node<T>*))
 
 // обход дерева обратный
 template<class T>
-void postorder(Node<T>* _root, void (*_func)(Node<T>*))
+void postorder(node<T>* _root, void (*_func)(node<T>*))
 {
 	if (_root)
 	{
@@ -210,7 +210,7 @@ void postorder(Node<T>* _root, void (*_func)(Node<T>*))
 
 // удаление дерева
 template<class T>
-void tree_delete(Node<T>*& _root)
+void tree_delete(node<T>*& _root)
 {
 	// если дерево существует
 	if (_root)
@@ -228,7 +228,7 @@ void tree_delete(Node<T>*& _root)
 
 // поиск узла
 template<class T>
-Node<T>* tree_find_node(Node<T>* _root, T _key)
+node<T>* tree_find_node(node<T>* _root, T _key)
 {
 	// если мы не нашли элемент 
 	// возвращаем nullptr
@@ -257,7 +257,7 @@ Node<T>* tree_find_node(Node<T>* _root, T _key)
 
 // нахождение высоты дерева
 template<class T>
-int tree_count_height(Node<T>* _root)
+int tree_count_height(node<T>* _root)
 {
 	// если элемент не существует
 	if (!_root)
@@ -276,7 +276,7 @@ int tree_count_height(Node<T>* _root)
 
 // нахождение количества узлов
 template<class T>
-int tree_count_nodes(Node<T>* _root)
+int tree_count_nodes(node<T>* _root)
 {
 	// если элемент не существует
 	if (!_root)
@@ -295,9 +295,9 @@ int tree_count_nodes(Node<T>* _root)
 
 // нахождение минимального элемента в дереве
 template<class T>
-Node<T>* tree_find_min(Node<T>* _root)
+node<T>* tree_find_min(node<T>* _root)
 {
-	Node<T>* current = _root;
+	node<T>* current = _root;
 
 	// идем по левой ветке, пока не дойдем до конца
 	while (current && current->m_left)
@@ -310,9 +310,9 @@ Node<T>* tree_find_min(Node<T>* _root)
 
 // нахождение максимального элемента в дереве
 template<class T>
-Node<T>* tree_find_max(Node<T>* _root)
+node<T>* tree_find_max(node<T>* _root)
 {
-	Node<T>* current = _root;
+	node<T>* current = _root;
 
 	// идем по правой ветке, пока не дойдем до конца
 	while (current && current->m_right)
@@ -325,7 +325,7 @@ Node<T>* tree_find_max(Node<T>* _root)
 
 // удаление элемента дерева
 template<class T>
-Node<T>* tree_node_delete(Node<T>* _root, T _key)
+node<T>* tree_node_delete(node<T>* _root, T _key)
 {
 	// Возвращаем, если дерево пустое
 	if (!_root) return _root;
@@ -346,20 +346,20 @@ Node<T>* tree_node_delete(Node<T>* _root, T _key)
 		// Если у узла один дочерний элемент или их нет
 		// если нет левой ветви
 		if (!_root->m_left) {
-			Node<T>* temp = _root->m_right;
+			node<T>* temp = _root->m_right;
 			delete _root;
 			return temp;
 		}
 		// если нет правой ветви
 		else if (!_root->m_right) {
-			Node<T>* temp = _root->m_left;
+			node<T>* temp = _root->m_left;
 			delete _root;
 			return temp;
 		}
 
 		// Если у узла два дочерних элемента
 		// находим минимальный элемент в правой ветви
-		Node<T>* temp = tree_find_min(_root->m_right);
+		node<T>* temp = tree_find_min(_root->m_right);
 
 		// помещаем найденный элемент в тот, который хотим удалить
 		_root->m_data = temp->m_data;
@@ -372,7 +372,7 @@ Node<T>* tree_node_delete(Node<T>* _root, T _key)
 
 // печать дерева
 template<class T>
-void tree_print(Node<T>* _root, int _lvl = 0)
+void tree_print(node<T>* _root, int _lvl = 0)
 {
 	if (_root)
 	{
@@ -388,6 +388,51 @@ void tree_print(Node<T>* _root, int _lvl = 0)
 		// вывод левого поддерева
 		tree_print(_root->m_left, _lvl + 1);
 	}
+}
+
+// пример готовой программы
+void example_program()
+{
+	// элементы, которые окажутся в дереве
+	char* mass = new char [10] { 'а','б','Г','Ж','я','д','е','А','м','Н' };
+
+	// заполнение дерева элементами
+	node<char>* root = tree_create(mass, 10);
+
+	// печать дерева
+	tree_print(root);
+
+	// поиск элемента в дереве
+	char to_find = 'Ж';
+	node<char>* finded_node = tree_find_node(root, to_find);
+	// если элемент был найден
+	if (finded_node)
+	{
+		cout << "Найденный элемент: " << finded_node->m_data << endl;
+	}
+	else
+	{
+		cout << "Элемент" << to_find << " не был найден\n";
+	}
+
+	// печать характеристик дерева
+	cout << "Количество узлов дерева: " << tree_count_nodes(root) << endl;
+	cout << "Высота дерева: " << tree_count_height(root) << endl;
+	cout << "Число узлов в левом поддереве: " << tree_count_nodes(root->m_left) << endl;
+	cout << "Число узлов в правом поддереве: " << tree_count_nodes(root->m_right) << endl;
+	cout << "Минимальный элемент: " << tree_find_min(root)->m_data << endl;
+	cout << "Максимальный элемент: " << tree_find_max(root)->m_data << endl;
+
+	// удаление из дерева
+	root = tree_node_delete(root, 'в');
+	root = tree_node_delete(root, 'б');
+	root = tree_node_delete(root, 'д');
+
+	// вывод дерева
+	tree_print(root);
+
+	// удаление дерева
+	tree_delete(root);
 }
 
 // ввод и проверка значений
@@ -423,7 +468,7 @@ T input_and_check(T _min, T _max,
 }
 
 // функция ведения диалога с пользователем
-template<typename T>
+template<typename T = char>
 void dialog()
 {
 	/* коды комманд
@@ -454,10 +499,11 @@ void dialog()
 	int pos_to_insert;
 
 	// переменная списка
-	list<T>* lst = NULL;
+	node<T>* root = nullptr;
 
-	// максимальный элемент
-	node<T>* max_elem = NULL;
+	// максимальный и минимальный элементы
+	node<T>* max_elem = nullptr;
+	node<T>* min_elem = nullptr;
 
 	do
 	{
@@ -476,51 +522,51 @@ void dialog()
 			example_program();
 			break;
 
-		case input_codes::tree_create:
-			if (!list_exists(lst))
-				lst = list_create<T>();
-			else
-				INFO("DIALOG: Список уже существует");
-			break;
+		//case input_codes::tree_create:
+		//	if (!list_exists(root))
+		//		root = list_create<T>();
+		//	else
+		//		INFO("DIALOG: Список уже существует");
+		//	break;
 
-		case input_codes::tree_insert:
-			elem = input_and_check(MIN_VALUE, MAX_VALUE,
-				"Введите элемент для вставки в конец");
-			list_push(lst, elem);
-			break;
+		//case input_codes::tree_insert:
+		//	elem = input_and_check(MIN_VALUE, MAX_VALUE,
+		//		"Введите элемент для вставки в конец");
+		//	list_push(root, elem);
+		//	break;
 
-		case input_codes::tree_delete_node:
-			list_pop(lst);
-			break;
+		//case input_codes::tree_delete_node:
+		//	list_pop(root);
+		//	break;
 
-		case input_codes::list_insert:
-			elem = input_and_check(MIN_VALUE, MAX_VALUE,
-				"Введите элемент для вставки");
+		//case input_codes::list_insert:
+		//	elem = input_and_check(MIN_VALUE, MAX_VALUE,
+		//		"Введите элемент для вставки");
 
-			pos_to_insert = input_and_check(MIN_VALUE_INSERT, MAX_VALUE_INSERT,
-				"Введите позицию для вставки");
+		//	pos_to_insert = input_and_check(MIN_VALUE_INSERT, MAX_VALUE_INSERT,
+		//		"Введите позицию для вставки");
 
-			// вставка элемента 
-			list_insert(lst, pos_to_insert, elem);
-			break;
+		//	// вставка элемента 
+		//	list_insert(root, pos_to_insert, elem);
+		//	break;
 
-		case input_codes::tree_print:
-			// печать списка
-			list_print(lst);
-			break;
+		//case input_codes::tree_print:
+		//	// печать списка
+		//	list_print(root);
+		//	break;
 
-		case input_codes::tree_delete:
-			// удаление списка
-			list_delete(lst);
-			break;
+		//case input_codes::tree_delete:
+		//	// удаление списка
+		//	list_delete(root);
+		//	break;
 
-		case input_codes::clear_console:
-			system("cls");
-			break;
+		//case input_codes::clear_console:
+		//	system("cls");
+		//	break;
 
-		case input_codes::find_max:
-			list_print_max_elem(lst);
-			break;
+		//case input_codes::find_max:
+		//	list_print_max_elem(root);
+		//	break;
 
 		default:
 			INFO("Неизвестный код")
@@ -538,6 +584,8 @@ void dialog()
 int main()
 {
 	setlocale(LC_ALL, "ru");
+
+	dialog();
 
 	// ДЛЯ ТЕСТОВ
 
