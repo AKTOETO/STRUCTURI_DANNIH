@@ -2,12 +2,12 @@
 *                    кафедра № 304 2 курс 3 семестр информатика			*
 *-----------------------------------------------------------------------*
 *	Project type : solution												*
-*	Project name : LW4													*
+*	Project name : LW1													*
 *	File name    : main.cpp												*
 *	Language     : c/c++												*
 *	Programmers  : Плоцкий Б.А. Раужев Ю. М.							*
-*	Created      :  12/11/22											*
-*	Last revision:  15/11/22											*
+*	Created      : 12/11/22												*
+*	Last revision: 16/11/22												*
 *	Comment(s)   : 														*
 *																		*
 *	Лабораторная работа «Бинарные деревья поиска»						*
@@ -18,6 +18,7 @@
 *	2.	Реализовать дополнительно функцию в соответствии с вариантом:	*
 *	T – тип ключей, D – диапазон изменения значений ключей.				*
 \***********************************************************************/
+
 #include <iostream>
 #include <iomanip>
 #include <Windows.h> // для считывания кириллицы
@@ -540,16 +541,16 @@ bool check_cyrillic_symbol(char _symb)
 void example_program()
 {
 	// элементы, которые окажутся в дереве
-	char* mass = new char [10] { 'а', 'б', 'Г', 'Ж', 'я', 'д', 'е', 'А', 'м', 'Н' };
+	char* mass = new char [9] { 'П', 'о', 'Г', 'о', 'c', 'я', 'н', 'М', 'А' };
 
 	// заполнение дерева элементами
-	node<char>* root = tree_create(mass, 10);
+	node<char>* root = tree_create(mass, 9);
 
 	// печать дерева
 	tree_print(root);
 
 	// поиск элемента в дереве
-	char to_find = 'Ж';
+	char to_find = 'о';
 	node<char>* finded_node = tree_find_node(root, to_find);
 	// если элемент был найден
 	if (finded_node)
@@ -570,13 +571,15 @@ void example_program()
 	cout << "Максимальный элемент: " << tree_find_max(root)->m_data << endl;
 
 	// удаление из дерева
-	root = tree_node_delete(root, 'в');
+	root = tree_node_delete(root, 'я');
 	root = tree_node_delete(root, 'б');
 	root = tree_node_delete(root, 'д');
 
 	// вывод дерева
 	tree_print(root);
 
+	cout << "Число узлов в левом поддереве: " << tree_count_nodes(root->m_left) << endl;
+	cout << "Число узлов в правом поддереве: " << tree_count_nodes(root->m_right) << endl;
 	// удаление дерева
 	tree_delete(root);
 }
