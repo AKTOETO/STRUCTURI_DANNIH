@@ -24,7 +24,7 @@
     <ProjectGuid>{f414d782-f15a-4295-af8d-ec9387f17d17}</ProjectGuid>
     <RootNamespace>STRUCTURIDANNIH</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>LW1_DEREVIYA</ProjectName>
+    <ProjectName>LW2_GRAPH</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
