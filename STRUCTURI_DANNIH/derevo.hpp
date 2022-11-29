@@ -7,7 +7,7 @@ using namespace std;
 
 const int N = 9;//Количество вершин
 
-int main()
+inline void prim()
 {
 	setlocale(LC_ALL, "Russian");
 

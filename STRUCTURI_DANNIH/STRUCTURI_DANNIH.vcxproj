@@ -129,7 +129,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="derevo.cpp" />
+    <ClCompile Include="derevo.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="data.txt" />

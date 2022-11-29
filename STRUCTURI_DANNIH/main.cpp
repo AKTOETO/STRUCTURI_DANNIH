@@ -21,6 +21,8 @@
 #include <iostream>
 #include <iomanip>
 #include <Windows.h> // для считывания кириллицы
+#include <string>
+#include "derevo.hpp"
 
 using namespace std;
 
@@ -34,25 +36,16 @@ using namespace std;
 // вывод в консоль сообщения
 #define INFO(str) if(NEED_PRINT_DEBUG)cout<<"\t"<<str<<"\n";
 
-// множитель ширины вывода дерева
-#define WIDTH_MULT_PRINT 4
-
 // коды для взаимодействия пользователья с программой
 enum class input_codes
 {
 	exit = 0,
 	template_program,
-	tree_insert,
-	tree_delete_node,
-	tree_print,
-	tree_delete,
-	tree_find_max,
-	tree_find_min,
-	tree_count_height,
-	tree_count_nodes,
-	tree_count_nodes_in_left_subtree,
-	tree_count_nodes_in_right_subtree,
-	tree_find_node,
+	read_matrix,
+	find_short_path_diykstra,
+	create_min_spanning_tree_prim,
+	delete_smej_matr,
+	print_smej_matr,
 	clear_console
 };
 
@@ -61,119 +54,55 @@ const char* command_str =
 "\nВведите номер комманды:\n\
 \t1. Выйти из программы.\n\
 \t2. Запустить пример готового алгоритма.\n\
-\t3. Добавить элемент в дерево.\n\
-\t4. Удалить элемент дерева.\n\
-\t5. Распечатать дерево.\n\
-\t6. Удалить дерево.\n\
-\t7. Найти элемент с максимальным значением.\n\
-\t8. Найти элемент с минимальным значением.\n\
-\t9. Найти высоту дерева.\n\
-\t10.Найти количество элементов дерева.\n\
-\t11.Найти количество элементов в левом поддереве.\n\
-\t12.Найти количество элементов в правом поддереве.\n\
-\t13.Найти определенный элемент в дереве.\n\
-\t14.Очистить консоль.";
+\t3. Считать матрицу из файла.\n\
+\t4. Найти кратчайшее расстояние от точки (Дейкстра).\n\
+\t5. Построить остовное дерево min стоимости (Прима).\n\
+\t6. Удалить матрицу смежности.\n\
+\t7. Распечатать матрицу смежности.\n\
+\t8. Очистить консоль.";
 
 /****************************************************************
-*							   N O D E					        *
+*				М А Т Р И Ц А   С М Е Ж Н О С Т И				*
 ****************************************************************/
-
-// элемент дерева
-template<class T>
-struct node
+struct SmejMatr
 {
-	T m_data;			// ключ
-	node* m_left;		// указатель на левого потомка
-	node* m_right;		// указатель на правого потомка
+	int** m_smej_matr;
+	int m_numb_of_vertexes;
 
-	// конструкторы
-	node() :m_left(nullptr), m_right(nullptr), m_data(NULL)
-	{
-		INFO("NODE: элемент создан");
-	};
-
-	node(T _data)
-		:m_left(nullptr), m_right(nullptr), m_data(_data)
-	{
-		INFO("NODE: элемент создан");
-	};
-
+	// конструктор
+	SmejMatr()
+		:m_smej_matr(nullptr), m_numb_of_vertexes(0)
+	{}
 	// деструктор
-	~node()
+	~SmejMatr()
 	{
-		m_data = T(NULL);
-		m_left = nullptr;
-		m_right = nullptr;
-		INFO("NODE: элемент удален");
+		for (int i = 0; i < m_numb_of_vertexes; i++)
+		{
+			delete[] m_smej_matr[i];
+		}
+		delete[] m_smej_matr;
 	}
 };
 
-// удаление элемента дерева
-template<class T>
-void node_delete(node<T>* _node);
+// чтение матрицы смежности из файла
+SmejMatr* read_smej_matr_from_file(string _file_path = "data.txt");
 
-// печать элемента
-template<class T>
-void node_print(node<T>* _node);
-
-/****************************************************************
-*							   T R E E					        *
-****************************************************************/
-// обход дерева симметричный
-template<class T>
-void inorder(node<T>* _root, void (*_func)(node<T>*));
-
-// обход дерева прямой
-template<class T>
-void preorder(node<T>* _root, void (*_func)(node<T>*));
-
-// обход дерева обратный
-template<class T>
-void postorder(node<T>* _root, void (*_func)(node<T>*));
-
-// создание дерева из массива
-template<class T>
-node<T>* tree_create(T* arr, int size);
-
-// удаление дерева
-template<class T>
-void tree_delete(node<T>*& _root);
-
-// печать дерева
-template<class T>
-void tree_print(node<T>* _root, int _lvl = 0);
-
-// вставка элемента в дерево
-template<class T>
-node<T>* tree_node_insert(node<T>* _root, T _key);
-
-// поиск узла
-template<class T>
-node<T>* tree_find_node(node<T>* _root, T _key);
-
-// нахождение высоты дерева
-template<class T>
-int tree_count_height(node<T>* _root);
-
-// нахождение количества узлов
-template<class T>
-int tree_count_nodes(node<T>* _root);
-
-// нахождение минимального элемента в дереве
-template<class T>
-node<T>* tree_find_min(node<T>* _root);
-
-// нахождение максимального элемента в дереве
-template<class T>
-node<T>* tree_find_max(node<T>* _root);
-
-// удаление элемента дерева
-template<class T>
-node<T>* tree_node_delete(node<T>* _root, T _key);
+// печать матрицы смежности
+void print_smej_matr(SmejMatr*);
 
 /****************************************************************
 *        В С П О М О Г А Т Е Л Ь Н Ы Е   Ф У Н К Ц И И          *
 ****************************************************************/
+
+// печать массива
+template<class T, class FUNC>
+void PrintArr(T* _arr, int _size, FUNC _prt);
+
+// обработка элемента из массива расстояний при печати
+string ChangeDistElem(int _elem);
+
+// обработка элемента из массива посещений при печати
+string ChangeVisitElem(int _elem);
 
 // проверка на номер команды
 bool check_number(int _num);
@@ -184,14 +113,24 @@ bool check_cyrillic_symbol(char _symb);
 // пример готовой программы
 void example_program();
 
+// выделение памяти под двумерный массив
+template<class T>
+T** mem_alloc(int _size_x, int _size_y);
+
 // ввод и проверка значений
-template<typename T>
-T input_and_check(bool(*_comp)(T),
-	const char* welcome_str, const char* err_str
+template<typename T, class FUNC>
+T input_and_check(FUNC,
+	string welcome_str, string err_str
 	= "Было введено некорректное значение");
 
 // функция ведения диалога с пользователем
 void dialog();
+
+// Поиск кратчайшего пути
+void Diykstra(SmejMatr* _sm, int _start_vert);
+
+// построение Min остового дерева
+void Prima(SmejMatr* _sm);
 
 /****************************************************************
 *                Г Л А В Н А Я   Ф У Н К Ц И Я                  *
@@ -213,315 +152,63 @@ int main()
 *              Р Е А Л И З А Ц И Я   Ф У Н К Ц И Й              *
 ****************************************************************/
 
-/****************************************************************
-*							   N O D E					        *
-****************************************************************/
-
-// удаление элемента дерева
-template<class T>
-void node_delete(node<T>* _node)
+SmejMatr* read_smej_matr_from_file(string _file_path)
 {
-	delete _node;
-}
+	ifstream fin(_file_path);
 
-// печать элемента
-template<class T>
-void node_print(node<T>* _node)
-{
-	cout << _node->m_data << " ";
-}
-
-/****************************************************************
-*							   T R E E					        *
-****************************************************************/
-
-/****************************************************************
-*							   T R E E					        *
-****************************************************************/
-// обход дерева симметричный
-template<class T>
-void inorder(node<T>* _root, void (*_func)(node<T>*)) {
-	if (_root)
+	// если файл не открылся
+	if (!fin.is_open())
 	{
-		// идем налево
-		inorder(_root->m_left, _func);
-
-		// обрабатываем элемент
-		_func(_root);
-
-		// идем направо
-		inorder(_root->m_right, _func);
-	}
-}
-
-// обход дерева прямой
-template<class T>
-void preorder(node<T>* _root, void (*_func)(node<T>*))
-{
-	if (_root)
-	{
-		// обрабатываем элемент
-		_func(_root);
-
-		// идем налево
-		preorder(_root->m_left, _func);
-
-		// идем направо
-		preorder(_root->m_right, _func);
-	}
-}
-
-// обход дерева обратный
-template<class T>
-void postorder(node<T>* _root, void (*_func)(node<T>*))
-{
-	if (_root)
-	{
-		// идем налево
-		postorder(_root->m_left, _func);
-
-		// идем направо
-		postorder(_root->m_right, _func);
-
-		// обрабатываем элемент
-		_func(_root);
-	}
-}
-
-// создание дерева из массива
-template<class T>
-node<T>* tree_create(T* arr, int size)
-{
-	// объявление переменной списка
-	node<T>* root = nullptr;
-
-	// заполнение дерева значениями
-	for (int i = 0; i < size; i++)
-	{
-		root = tree_node_insert(root, arr[i]);
-	}
-
-	INFO("CREATE_TREE: дерево создано");
-
-	// возвращение созданного списка
-	return root;
-}
-
-// удаление дерева
-template<class T>
-void tree_delete(node<T>*& _root)
-{
-	// если дерево существует
-	if (_root)
-	{
-		// удаляем его
-		postorder(_root, node_delete);
-		_root = nullptr;
-		INFO("TREE_DELETE: дерево удалено");
-	}
-	else
-	{
-		INFO("TREE_DELETE: дерево не существует");
-	}
-}
-
-// печать дерева
-template<class T>
-void tree_print(node<T>* _root, int _lvl)
-{
-	if (_root)
-	{
-		// вывод правого поддерева
-		tree_print(_root->m_right, _lvl + 1);
-
-		// вывод количества сдвигов
-		cout << fixed << setw(_lvl * WIDTH_MULT_PRINT) << setfill(' ') << ' ';
-
-		// вывод корня
-		cout << _root->m_data << endl;
-
-		// вывод левого поддерева
-		tree_print(_root->m_left, _lvl + 1);
-	}
-}
-
-// вставка элемента в дерево
-template<class T>
-node<T>* tree_node_insert(node<T>* _root, T _key)
-{
-	// если текущий элемент пуст
-	if (!_root)
-	{
-		// создаем новый элемент
-		node<T>* new_node = new node<T>(_key);
-
-		INFO("INSERT: элемент вставлен");
-
-		// возвращаем его
-		return new_node;
-	}
-	// если ключ меньше ключа текущего элемента
-	if (_key < _root->m_data)
-	{
-		// идем влево
-		_root->m_left = tree_node_insert(_root->m_left, _key);
-	}
-	// если ключ больше ключа текущего элемента
-	else if (_key > _root->m_data)
-	{
-		// идем вправо
-		_root->m_right = tree_node_insert(_root->m_right, _key);
-	}
-	return _root;
-}
-
-// поиск узла
-template<class T>
-node<T>* tree_find_node(node<T>* _root, T _key)
-{
-	// если мы не нашли элемент 
-	// возвращаем nullptr
-	if (!_root)
-	{
+		INFO("ЧТЕНИЕ: файл не был открыт");
 		return nullptr;
 	}
-	// если мы нашли элемент, возвращаем _root
-	else if (_key == _root->m_data)
+
+	// создаем структуру смежной матрицы
+	SmejMatr* sm = new SmejMatr;
+
+	// считываем количество вершин
+	fin >> sm->m_numb_of_vertexes;
+	fin.get();
+
+	//выделение памяти под матрицу
+	sm->m_smej_matr = mem_alloc<int>(sm->m_numb_of_vertexes, sm->m_numb_of_vertexes);
+
+	// считываем матрицу смежности
+	for (int i = 0; i < sm->m_numb_of_vertexes; i++)
 	{
-		return _root;
-	}
-	// если элемент для поиска меньше текущего
-	else if (_key < _root->m_data)
-	{
-		// переходим к левой ветви
-		return tree_find_node(_root->m_left, _key);
-	}
-	// если элемент для поиска больше текущего
-	else
-	{
-		// переходим к правой ветви
-		return tree_find_node(_root->m_right, _key);
-	}
-}
-
-// нахождение высоты дерева
-template<class T>
-int tree_count_height(node<T>* _root)
-{
-	// если элемент не существует
-	if (!_root)
-		return 0;
-
-	// если это самый низкий элемент в данной ветке
-	if (!_root->m_left && !_root->m_right)
-		return 1;
-
-	// возвращаем максимальное значение из двух ветвей + 1
-	return max(
-		tree_count_height(_root->m_left),
-		tree_count_height(_root->m_right)
-	) + 1;
-}
-
-// нахождение количества узлов
-template<class T>
-int tree_count_nodes(node<T>* _root)
-{
-	// если элемент не существует
-	if (!_root)
-		return 0;
-
-	// если это самый низкий элемент в данной ветке
-	if (!_root->m_left && !_root->m_right)
-		return 1;
-
-	// возвращаем сумму значений из двух ветвей + 1
-	return (
-		tree_count_nodes(_root->m_left) +
-		tree_count_nodes(_root->m_right)
-		) + 1;
-}
-
-// нахождение минимального элемента в дереве
-template<class T>
-node<T>* tree_find_min(node<T>* _root)
-{
-	node<T>* current = _root;
-
-	// идем по левой ветке, пока не дойдем до конца
-	while (current && current->m_left)
-	{
-		current = current->m_left;
-	}
-
-	return current;
-}
-
-// нахождение максимального элемента в дереве
-template<class T>
-node<T>* tree_find_max(node<T>* _root)
-{
-	node<T>* current = _root;
-
-	// идем по правой ветке, пока не дойдем до конца
-	while (current && current->m_right)
-	{
-		current = current->m_right;
-	}
-
-	return current;
-}
-
-// удаление элемента дерева
-template<class T>
-node<T>* tree_node_delete(node<T>* _root, T _key)
-{
-	// Возвращаем, если дерево пустое
-	if (!_root) return _root;
-
-	// Ищем узел, который хотим удалить
-	if (_key < _root->m_data)
-	{
-		// идем на левую ветвь
-		_root->m_left = tree_node_delete(_root->m_left, _key);
-	}
-	else if (_key > _root->m_data)
-	{
-		// идем на правую ветвь
-		_root->m_right = tree_node_delete(_root->m_right, _key);
-	}
-	// если был найден нужный элемент
-	else {
-		// Если у узла один дочерний элемент или их нет
-		// если нет левой ветви
-		if (!_root->m_left) {
-			node<T>* temp = _root->m_right;
-			delete _root;
-			return temp;
+		for (int j = 0; j < sm->m_numb_of_vertexes; j++)
+		{
+			fin >> sm->m_smej_matr[i][j];
 		}
-		// если нет правой ветви
-		else if (!_root->m_right) {
-			node<T>* temp = _root->m_left;
-			delete _root;
-			return temp;
-		}
-
-		// Если у узла два дочерних элемента
-		// находим минимальный элемент в правой ветви
-		node<T>* temp = tree_find_min(_root->m_right);
-
-		// помещаем найденный элемент в тот, который хотим удалить
-		_root->m_data = temp->m_data;
-
-		// удаляем скопированный элемент из правой ветви дерева
-		_root->m_right = tree_node_delete(_root->m_right, temp->m_data);
 	}
-	return _root;
+
+	fin.close();
+	return sm;
 }
 
-/****************************************************************
-*        В С П О М О Г А Т Е Л Ь Н Ы Е   Ф У Н К Ц И И          *
-****************************************************************/
+void print_smej_matr(SmejMatr* _sm)
+{
+	INFO("Матрица смежности");
+	cout << "Количество вершин = " << _sm->m_numb_of_vertexes << endl;
+	for (int i = 0; i < _sm->m_numb_of_vertexes; i++)
+	{
+		for (int j = 0; j < _sm->m_numb_of_vertexes; j++)
+		{
+			cout << _sm->m_smej_matr[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+string ChangeDistElem(int _elem)
+{
+	return (_elem == INT_MAX ? "inf" : to_string(_elem));
+}
+
+string ChangeVisitElem(int _elem)
+{
+	return to_string(_elem) + " ";
+}
 
 // проверка на номер команды
 bool check_number(int _num)
@@ -529,62 +216,39 @@ bool check_number(int _num)
 	return 0 <= _num && _num <= 14;
 }
 
-// проверка на корректность введенного символа
-bool check_cyrillic_symbol(char _symb)
-{
-	return 'А' <= _symb && _symb <= 'я'
-		|| _symb == 'ё' || _symb == 'Ё';
-}
-
 // пример готовой программы
 void example_program()
 {
-	// элементы, которые окажутся в дереве
-	char* mass = new char [10] { 'а', 'б', 'Г', 'Ж', 'я', 'д', 'е', 'А', 'м', 'Н' };
+	// считывание матрицы смежности из файла
+	SmejMatr* sm = read_smej_matr_from_file();
 
-	// заполнение дерева элементами
-	node<char>* root = tree_create(mass, 10);
+	// позиция, от которой ищется путь
+	int pos = 1;	
 
-	// печать дерева
-	tree_print(root);
+	// поиск кратчайшего пути
+	Diykstra(sm, pos);
 
-	// поиск элемента в дереве
-	char to_find = 'Ж';
-	node<char>* finded_node = tree_find_node(root, to_find);
-	// если элемент был найден
-	if (finded_node)
+	// печать матрицы смежности
+	print_smej_matr(sm);
+}
+
+template<class T = int>
+T** mem_alloc(int _size_x, int _size_y)
+{
+	T** arr = new T * [_size_x];
+
+	for (int i = 0; i < _size_x; i++)
 	{
-		cout << "Найденный элемент: " << finded_node->m_data << endl;
-	}
-	else
-	{
-		cout << "Элемент" << to_find << " не был найден\n";
+		arr[i] = new T[_size_y];
 	}
 
-	// печать характеристик дерева
-	cout << "Количество узлов дерева: " << tree_count_nodes(root) << endl;
-	cout << "Высота дерева: " << tree_count_height(root) << endl;
-	cout << "Число узлов в левом поддереве: " << tree_count_nodes(root->m_left) << endl;
-	cout << "Число узлов в правом поддереве: " << tree_count_nodes(root->m_right) << endl;
-	cout << "Минимальный элемент: " << tree_find_min(root)->m_data << endl;
-	cout << "Максимальный элемент: " << tree_find_max(root)->m_data << endl;
-
-	// удаление из дерева
-	root = tree_node_delete(root, 'в');
-	root = tree_node_delete(root, 'б');
-	root = tree_node_delete(root, 'д');
-
-	// вывод дерева
-	tree_print(root);
-
-	// удаление дерева
-	tree_delete(root);
+	return arr;
 }
 
 // ввод и проверка значений
-template<typename T>
-T input_and_check(bool(*_comp)(T),
-	const char* welcome_str, const char* err_str)
+template<typename T, class FUNC>
+T input_and_check(FUNC _comp,
+	string welcome_str, string err_str)
 {
 	// размер массива
 	T symb;
@@ -604,7 +268,7 @@ T input_and_check(bool(*_comp)(T),
 		cout << err_str << "\n";
 
 		// рекурсивное обращение
-		symb = input_and_check(_comp, welcome_str, err_str);
+		symb = input_and_check<T,FUNC>(_comp, welcome_str, err_str);
 	}
 	return symb;
 }
@@ -615,37 +279,26 @@ void dialog()
 	// переменная содержащая коды действий
 	input_codes in_code;
 
-	// элемент для вставки
-	char symb;
+	// временное число
+	int temp;
 
-	// переменная корня
-	node<char>* root = nullptr;
-
-	// элемент для поиска max и min в дереве
-	node<char>* elem = nullptr;
+	// матрица смежности
+	SmejMatr* sm = nullptr;
 
 	/* коды комманд
-	exit,								1
-	template_program,					2
-	tree_insert,						3
-	tree_delete_node,					4
-	tree_print,							5
-	tree_delete,						6
-	tree_find_max,						7
-	tree_find_min,						8
-	tree_count_height,					9
-	tree_count_nodes,					10
-	tree_count_nodes_in_left_subtree,	11
-	tree_count_nodes_in_right_subtree,	12
-	tree_find_node,						13
-	clear_console						14
+		exit = 0,
+		template_program,
+		read_matrix,
+		find_short_path_diykstra,
+		create_min_spanning_tree_prim,
+		clear_console
 	*/
 
 	do
 	{
 		// запрос у пользователя следующих действий
 		in_code = input_codes(
-			input_and_check(check_number, command_str)
+			input_and_check<int>(check_number, command_str)
 			- 1);
 
 		// запуск соответствующих функций
@@ -655,85 +308,49 @@ void dialog()
 			INFO("Произведен выход");
 			break;
 
+		case input_codes::read_matrix:
+			INFO("Чтение из файла");
+			delete sm;
+			sm = read_smej_matr_from_file();
+			break;
+
 		case input_codes::template_program:
 			INFO("Запуск примера кода");
 			example_program();
 			break;
 
-		case input_codes::tree_insert:
-			symb = input_and_check(check_cyrillic_symbol,
-				"Введите символ для вставки в дерево: ");
-			root = tree_node_insert(root, symb);
-			break;
-
-		case input_codes::tree_delete_node:
-			symb = input_and_check(check_cyrillic_symbol,
-				"Введите символ для удаления в дереве: ");
-			root = tree_node_delete(root, symb);
-			break;
-
-		case input_codes::tree_print:
-			cout << endl;
-			tree_print(root);
-			break;
-
-		case input_codes::tree_delete:
-			tree_delete(root);
-			break;
-
-		case input_codes::tree_find_max:
-			elem = tree_find_max(root);
-			if (elem)
-				cout << "Максимальный элемент в дереве: "
-				<< elem->m_data << endl;
+		case input_codes::find_short_path_diykstra:
+			if (!sm) { INFO("ДИАЛОГ ДЕЙКСТРА: матрица смежности не существует"); }
 			else
-				INFO("FIND_MAX: дерево пусто");
+			{
+				temp = input_and_check<int>([&sm](int el)
+					{
+						return el >= 1 & el <= sm->m_numb_of_vertexes;
+					},
+					"Введите номер вершины, от которой будет происходить поиск расстояния: ",
+						"Номер должен быть в пределах: [1,"+to_string(sm->m_numb_of_vertexes)+"]");
+				Diykstra(sm, temp-1);
+			}
 			break;
 
-		case input_codes::tree_find_min:
-			elem = tree_find_min(root);
-			if (elem)
-				cout << "Минимальный элемент в дереве: "
-				<< elem->m_data << endl;
+		case input_codes::create_min_spanning_tree_prim:
+			INFO("Остовное дерево минимальной стоимости");
+			
+			break;
+
+		case input_codes::delete_smej_matr:
+			INFO("Удаление матрицы смежности");
+			delete sm;
+			sm = nullptr;
+			break;
+
+		case input_codes::print_smej_matr:
+			INFO("Печать матрицы смежности");
+			if(!sm) { INFO("ДИАЛОГ ПЕЧАТЬ: матрица смежности не существует"); }
 			else
-				INFO("FIND_MIN: дерево пусто");
-			break;
-
-		case input_codes::tree_count_height:
-			cout << "Высота дерева: " <<
-				tree_count_height(root) << endl;
-			break;
-
-		case input_codes::tree_count_nodes:
-			cout << "Количество элементов в дереве: " <<
-				tree_count_nodes(root) << endl;
-			break;
-
-		case input_codes::tree_count_nodes_in_left_subtree:
-			if (root)
-				cout << "Количество элементов в левом поддереве: " <<
-				tree_count_nodes(root->m_left) << endl;
-			else
-				INFO("TREE_COUNT_NODES_IN_LEFT_SUBTREE: дерево пусто");
-			break;
-
-		case input_codes::tree_count_nodes_in_right_subtree:
-			if (root)
-				cout << "Количество элементов в правом поддереве: " <<
-				tree_count_nodes(root->m_right) << endl;
-			else
-				INFO("TREE_COUNT_NODES_IN_RIGHT_SUBTREE: дерево пусто");
-			break;
-
-		case input_codes::tree_find_node:
-			symb = input_and_check(check_cyrillic_symbol,
-				"Введите символ для поиска в дереве: ");
-			elem = tree_find_node(root, symb);
-
-			if (elem)
-				cout << "Элемент [" << symb << "] был найден\n";
-			else
-				cout << "Элемент [" << symb << "] НЕ был найден\n";
+			{
+				print_smej_matr(sm);
+			}
 			break;
 
 		case input_codes::clear_console:
@@ -741,8 +358,8 @@ void dialog()
 			break;
 
 		default:
-			INFO("Неизвестный код")
-				break;
+			INFO("Неизвестный код");
+			break;
 		}
 
 	} while (
@@ -752,4 +369,172 @@ void dialog()
 		in_code != input_codes::template_program
 		);
 }
+
+template<class T, class FUNC>
+void PrintArr(T* _arr, int _size, FUNC _prt)
+{
+	for (int i = 0; i < _size; i++)
+	{
+		cout << '\t' << _prt(_arr[i]);
+	}
+	cout << endl;
+}
+
+void Diykstra(SmejMatr* _sm, int _start_vert)
+{
+	INFO("Алгоритм Дейкстры");
+
+	// количество вершин
+	int size = _sm->m_numb_of_vertexes;
+
+	// кратчайшие пути до вершин относительно вершины _start_vert
+	int* short_distance = new int[size];
+
+	// хранение информации о посещенных вершинах
+	bool* visited_node = new bool[size];
+
+	// минимальное расстояние
+	int min = INT_MAX;
+	// индекс элемента с минимальным расстоянием
+	int minindex = INT_MAX;
+
+	// изначально все вершины делаем непосещенными
+	// и расстояние до каждой делаем максимално возможным
+	for (int i = 0; i < size; i++)
+	{
+		short_distance[i] = INT_MAX;
+		visited_node[i] = false;
+	}
+	cout << "расстояния: ";
+	PrintArr(short_distance, size, ChangeDistElem);
+
+	cout << " посещения: ";
+	PrintArr<bool>(visited_node, size, ChangeVisitElem);
+
+	// расстояние для вершины, из которой идем, обнуляем
+	short_distance[_start_vert] = 0;
+
+	// шаг алгоритма
+	for (int count = 0; count < size; count++)
+	{
+		cout << "ШАГ: " << count + 1 << endl;
+
+		// поиск непосещенной вершины с минимальным расстоянием
+		min = INT_MAX;
+		for (int i = 0; i < size; i++)
+		{
+			if (!visited_node[i] && short_distance[i] < min)
+			{
+				min = short_distance[i];
+				minindex = i;
+			}
+		}
+
+		// отмечаем посещенным элемент с индексом minindex
+		visited_node[minindex] = true;
+
+		// если у элемента есть какое-то расстояние
+		if (short_distance[minindex] != INT_MAX)
+		{
+			// ищем смежные элементы с minindex 
+			// и меняем минимальное расстояние до смежных вершин
+			// если это необходимо
+			for (int i = 0; i < size; i++)	// i - вершина
+			{
+				if (
+					// если существует ребро между i и minindex
+					_sm->m_smej_matr[minindex][i] &&
+					// если вершина не была посещена
+					!visited_node[i] &&
+					// если расстояние от _start_vert до i > 
+					// расстояния от _start_vert до minindex + 
+					// от minindex до i
+					short_distance[minindex] + _sm->m_smej_matr[minindex][i]
+					< short_distance[i]
+					)
+				{
+					short_distance[i] = short_distance[minindex] + _sm->m_smej_matr[minindex][i];
+				}
+			}
+		}
+
+		cout << "расстояния: ";
+		PrintArr(short_distance, size, ChangeDistElem);
+
+		cout << " посещения: ";
+		PrintArr<bool>(visited_node, size, ChangeVisitElem);
+	}
+
+	// Восстановление путей до вершин
+	cout << "\nКратчайшие пути\n";
+	// массив с путем 
+	int* out_path = new int[size];
+	for (int i = 0; i < size; i++)
+	{
+		// конечная вершина
+		int end = i;
+		// записываем конечную вершину в массив с путем
+		out_path[0] = end + 1;
+		// счетчик, для правильной записи элементов в массив с путем
+		int k = 1;
+		// длина пути до конечной вершины
+		int weight = short_distance[end];
+
+		// пока не дошли до начальной вершины и 
+		// пока есть путь от начальной до конечной вершины
+		while (end != _start_vert && short_distance[end] != INT_MAX)
+		{
+			// ищем смежные вершины с конечной
+			for (int i = 0; i < size; i++)
+			{
+				if (_sm->m_smej_matr[i][end])
+				{
+					// если нашли смежную вершину
+					// проверяем совпадет ли вес текущей вершины
+					// с весом конечной - ребро, смежное с конечной и текущей
+					if (weight - _sm->m_smej_matr[i][end] == short_distance[i])
+					{
+						// вычитаем вес
+						weight -= _sm->m_smej_matr[i][end];
+						// обновляем конечную вершину
+						end = i;
+						// добавляем эту вершину в массив с путем
+						out_path[k] = i + 1;
+						k++;
+					}
+				}
+			}
+		}
+
+		// вывод последовательности с длиной
+		// если путь существует до вершины
+		// и вершина i не является начальной
+		if (short_distance[i] != INT_MAX && i != _start_vert)
+		{
+			// печатаем путь
+			for (int j = k - 1; j >= 0; j--)
+			{
+				cout << out_path[j];
+				if (j > 0)	cout << " > ";
+			}
+			cout << " = " << short_distance[i] << endl;
+		}
+		// иначе говорим, что пути нет
+		else
+		{
+			cout << _start_vert + 1 << " > " << i + 1 << " = " << "маршрут недоступен" << endl;
+		}
+	}
+
+	// чистим память
+	delete[] out_path;
+	delete[] visited_node;
+	delete[] short_distance;
+}
+
+void Prima(SmejMatr* _sm)
+{
+
+}
+
 /**************** End Of main.cpp File ***************/
