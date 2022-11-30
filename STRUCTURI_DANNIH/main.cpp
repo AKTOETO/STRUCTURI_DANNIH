@@ -9,20 +9,18 @@
 *	Created      : 10/11/22												*
 *	Last revision: 30/11/22												*
 *	Comment(s)   : 														*
-*				   1. Реализовать функции вставки, поиска,				*
-*	удаления узла, обхода дерева, вывода дерева на экран,				*
-*	нахождения высоты дерева и количества узлов.						*
-*																		*
-*				   2. Реализовать дополнительно функцию					*
-*	в соответствии с вариантом: T – тип ключей,							*
-*	D – диапазон изменения значений ключей.								*
+*		Для взвешенного ориентированного графа, состоящего как минимум	*
+*	из 10 вершин, реализовать по вариантам:								*
+*	1.	алгоритм поиска кратчайшего пути;								*
+*	2.	сделав тот же самый граф неориентированным, построить его		*
+*	остовное дерево минимальной стоимости.								*
 *																		*
 \***********************************************************************/
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 #include <Windows.h> // для считывания кириллицы
 #include <string>
-#include "derevo.hpp"
 
 using namespace std;
 
@@ -49,8 +47,11 @@ enum class input_codes
 	clear_console
 };
 
+// путь до графаа
+const string graph_file_path = "graph.txt";
+
 // строка с коммандами
-const char* command_str =
+const string command_str =
 "\nВведите номер комманды:\n\
 \t1. Выйти из программы.\n\
 \t2. Запустить пример готового алгоритма.\n\
@@ -85,10 +86,13 @@ struct SmejMatr
 };
 
 // чтение матрицы смежности из файла
-SmejMatr* read_smej_matr_from_file(string _file_path = "data.txt");
+SmejMatr* read_smej_matr_from_file(string _file_path = graph_file_path);
 
 // печать матрицы смежности
 void print_smej_matr(SmejMatr*);
+
+// конвертация ориентированного графа в неориентированный
+void ConverOrientedIntoDisoriened(SmejMatr*&);
 
 /****************************************************************
 *        В С П О М О Г А Т Е Л Ь Н Ы Е   Ф У Н К Ц И И          *
@@ -104,11 +108,12 @@ string ChangeDistElem(int _elem);
 // обработка элемента из массива посещений при печати
 string ChangeVisitElem(int _elem);
 
+// установка одного значения во все ячейка матрицы
+template<class T>
+void SetMartixValue(T** _mat, int _sizex, int _sizey, T _value);
+
 // проверка на номер команды
 bool check_number(int _num);
-
-// проверка на корректность введенного символа
-bool check_cyrillic_symbol(char _symb);
 
 // пример готовой программы
 void example_program();
@@ -130,7 +135,7 @@ void dialog();
 void Diykstra(SmejMatr* _sm, int _start_vert);
 
 // построение Min остового дерева
-void Prima(SmejMatr* _sm);
+void Prima(SmejMatr* _sm, int _st);
 
 /****************************************************************
 *                Г Л А В Н А Я   Ф У Н К Ц И Я                  *
@@ -166,20 +171,39 @@ SmejMatr* read_smej_matr_from_file(string _file_path)
 	// создаем структуру смежной матрицы
 	SmejMatr* sm = new SmejMatr;
 
-	// считываем количество вершин
-	fin >> sm->m_numb_of_vertexes;
-	fin.get();
+	// количество вершин
+	sm->m_numb_of_vertexes = 1;
+
+	// выяснение количества строк
+	int numb_of_string = 0;
+	int cur_vert = 0;
+	while (fin.peek() != EOF)
+	{
+		int temp;
+		fin >> temp;
+		if (temp != cur_vert)
+		{
+			cur_vert = temp;
+			sm->m_numb_of_vertexes++;
+		}
+		fin.ignore(INT_MAX, '\n');
+		numb_of_string++;
+	}
+
+	// перемещение указателя в начало файла
+	fin.close();
+	fin.open(_file_path);
 
 	//выделение памяти под матрицу
 	sm->m_smej_matr = mem_alloc<int>(sm->m_numb_of_vertexes, sm->m_numb_of_vertexes);
+	SetMartixValue(sm->m_smej_matr, sm->m_numb_of_vertexes, sm->m_numb_of_vertexes, 0);
 
 	// считываем матрицу смежности
-	for (int i = 0; i < sm->m_numb_of_vertexes; i++)
+	for (int i = 0; i < numb_of_string; i++)
 	{
-		for (int j = 0; j < sm->m_numb_of_vertexes; j++)
-		{
-			fin >> sm->m_smej_matr[i][j];
-		}
+		int from, to;
+		fin >> from >> to;
+		fin >> sm->m_smej_matr[to][from];
 	}
 
 	fin.close();
@@ -194,9 +218,32 @@ void print_smej_matr(SmejMatr* _sm)
 	{
 		for (int j = 0; j < _sm->m_numb_of_vertexes; j++)
 		{
-			cout << _sm->m_smej_matr[i][j] << " ";
+			cout << '\t' <<
+				(_sm->m_smej_matr[i][j] == INT_MAX ?
+					"inf" : to_string(_sm->m_smej_matr[i][j]));
 		}
 		cout << endl;
+	}
+}
+
+void ConverOrientedIntoDisoriened(SmejMatr*& _sm)
+{
+	INFO("Конвертация ориентированного графа в неориентированный");
+	for (int i = 0; i < _sm->m_numb_of_vertexes; i++)
+	{
+		for (int j = 0; j < _sm->m_numb_of_vertexes; j++)
+		{
+			if (_sm->m_smej_matr[i][j] != 0)
+			{
+				_sm->m_smej_matr[j][i] =
+					_sm->m_smej_matr[i][j];
+			}
+			else
+			{
+				_sm->m_smej_matr[i][j] = 
+					_sm->m_smej_matr[i][j] == 0 ? INT_MAX : _sm->m_smej_matr[i][j];
+			}
+		}
 	}
 }
 
@@ -223,7 +270,7 @@ void example_program()
 	SmejMatr* sm = read_smej_matr_from_file();
 
 	// позиция, от которой ищется путь
-	int pos = 1;	
+	int pos = 1;
 
 	// поиск кратчайшего пути
 	Diykstra(sm, pos);
@@ -268,7 +315,7 @@ T input_and_check(FUNC _comp,
 		cout << err_str << "\n";
 
 		// рекурсивное обращение
-		symb = input_and_check<T,FUNC>(_comp, welcome_str, err_str);
+		symb = input_and_check<T, FUNC>(_comp, welcome_str, err_str);
 	}
 	return symb;
 }
@@ -320,7 +367,10 @@ void dialog()
 			break;
 
 		case input_codes::find_short_path_diykstra:
-			if (!sm) { INFO("ДИАЛОГ ДЕЙКСТРА: матрица смежности не существует"); }
+			if (!sm)
+			{
+				INFO("ДИАЛОГ ДЕЙКСТРА: матрица смежности не существует");
+			}
 			else
 			{
 				temp = input_and_check<int>([&sm](int el)
@@ -328,14 +378,29 @@ void dialog()
 						return el >= 1 & el <= sm->m_numb_of_vertexes;
 					},
 					"Введите номер вершины, от которой будет происходить поиск расстояния: ",
-						"Номер должен быть в пределах: [1,"+to_string(sm->m_numb_of_vertexes)+"]");
-				Diykstra(sm, temp-1);
+						"Номер должен быть в пределах: [1," + to_string(sm->m_numb_of_vertexes) + "]");
+				Diykstra(sm, temp - 1);
 			}
 			break;
 
 		case input_codes::create_min_spanning_tree_prim:
 			INFO("Остовное дерево минимальной стоимости");
-			
+			if (!sm)
+			{
+				INFO("ДИАЛОГ ДЕЙКСТРА: матрица смежности не существует");
+			}
+			else
+			{
+				temp = input_and_check<int>([&sm](int el)
+					{
+						return el >= 1 & el <= sm->m_numb_of_vertexes;
+					},
+					"Введите номер вершины, от которой будет строиться остовное дерево: ",
+						"Номер должен быть в пределах: [1," + to_string(sm->m_numb_of_vertexes) + "]");
+				ConverOrientedIntoDisoriened(sm);
+				print_smej_matr(sm);
+				Prima(sm, temp-1);
+			}
 			break;
 
 		case input_codes::delete_smej_matr:
@@ -346,7 +411,7 @@ void dialog()
 
 		case input_codes::print_smej_matr:
 			INFO("Печать матрицы смежности");
-			if(!sm) { INFO("ДИАЛОГ ПЕЧАТЬ: матрица смежности не существует"); }
+			if (!sm) { INFO("ДИАЛОГ ПЕЧАТЬ: матрица смежности не существует"); }
 			else
 			{
 				print_smej_matr(sm);
@@ -378,6 +443,18 @@ void PrintArr(T* _arr, int _size, FUNC _prt)
 		cout << '\t' << _prt(_arr[i]);
 	}
 	cout << endl;
+}
+
+template<class T>
+void SetMartixValue(T** _mat, int _sizex, int _sizey, T _value)
+{
+	for (int i = 0; i < _sizex; i++)
+	{
+		for (int j = 0; j < _sizey; j++)
+		{
+			_mat[i][j] = _value;
+		}
+	}
 }
 
 void Diykstra(SmejMatr* _sm, int _start_vert)
@@ -532,8 +609,55 @@ void Diykstra(SmejMatr* _sm, int _start_vert)
 	delete[] short_distance;
 }
 
-void Prima(SmejMatr* _sm)
+void Prima(SmejMatr* _sm, int _st)
 {
+	// количество вершин
+	int size = _sm->m_numb_of_vertexes;
+
+	// пройденные вершины
+	bool* nodes = new bool[size];
+	
+	for (int i = 0; i < size; i++)
+	{
+		nodes[i] = false;
+	}
+
+	//Количество рассмотренных вершин
+	int num_of_nodes = 0;
+	//Берем первую вершину
+	nodes[_st] = true;
+	//Связанные вершины, минимум
+	int x, y, min;
+	int weight = 0;
+	cout << "Минимальное остовное дерево" << endl;
+
+	//Алгоритм Прима
+	while (num_of_nodes < size - 1) {
+		x = 0;
+		y = 0;
+		min = INT32_MAX;
+		for (int i = 0; i < size; i++) {
+			if (nodes[i]) {
+				for (int j = 0; j < size; j++) {
+					//Еще не выбирали эту вершину и существует связь между ними
+					if (!nodes[j] && _sm->m_smej_matr[i][j] < INT_MAX) {
+						if (_sm->m_smej_matr[i][j] < min) {
+							min = _sm->m_smej_matr[i][j];
+							x = i;
+							y = j;
+						}
+					}
+				}
+			}
+		}
+		weight += min;
+		cout << x + 1 << " > " << y + 1 << " = " << _sm->m_smej_matr[x][y] << endl;
+		nodes[y] = true;
+		num_of_nodes++;
+	}
+	cout << "Вес минимального остовного дерева равен " << weight << endl;
+
+	// вывод матрицы
 
 }
 

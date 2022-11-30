@@ -18,11 +18,12 @@
     <ClCompile Include="main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="derevo.cpp">
-      <Filter>Исходные файлы</Filter>
+    <ClCompile Include="derevo.hpp">
+      <Filter>Файлы заголовков</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="data.txt" />
+    <Text Include="graph.txt" />
   </ItemGroup>
 </Project>
