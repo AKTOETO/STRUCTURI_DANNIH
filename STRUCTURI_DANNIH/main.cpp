@@ -17,7 +17,7 @@
 *																		*
 \***********************************************************************/
 #include <iostream>
-#include <iomanip>
+//#include <iomanip>
 #include <fstream>
 #include <Windows.h> // для считывания кириллицы
 #include <string>
@@ -39,7 +39,6 @@ enum class input_codes
 {
 	exit = 0,
 	template_program,
-	read_matrix,
 	find_short_path_diykstra,
 	create_min_spanning_tree_prim,
 	delete_smej_matr,
@@ -55,12 +54,11 @@ const string command_str =
 "\nВведите номер комманды:\n\
 \t1. Выйти из программы.\n\
 \t2. Запустить пример готового алгоритма.\n\
-\t3. Считать матрицу из файла.\n\
-\t4. Найти кратчайшее расстояние от точки (Дейкстра).\n\
-\t5. Построить остовное дерево min стоимости (Прима).\n\
-\t6. Удалить матрицу смежности.\n\
-\t7. Распечатать матрицу смежности.\n\
-\t8. Очистить консоль.";
+\t3. Найти кратчайшее расстояние от точки (Дейкстра).\n\
+\t4. Построить остовное дерево min стоимости (Прима).\n\
+\t5. Удалить матрицу смежности.\n\
+\t6. Распечатать матрицу смежности.\n\
+\t7. Очистить консоль.";
 
 /****************************************************************
 *				М А Т Р И Ц А   С М Е Ж Н О С Т И				*
@@ -86,10 +84,10 @@ struct SmejMatr
 };
 
 // чтение матрицы смежности из файла
-SmejMatr* read_smej_matr_from_file(string _file_path = graph_file_path);
+SmejMatr* ReadGraphFromFile(string _file_path = graph_file_path);
 
 // печать матрицы смежности
-void print_smej_matr(SmejMatr*);
+void PrintGraph(SmejMatr*);
 
 // конвертация ориентированного графа в неориентированный
 void ConverOrientedIntoDisoriened(SmejMatr*&);
@@ -113,23 +111,23 @@ template<class T>
 void SetMartixValue(T** _mat, int _sizex, int _sizey, T _value);
 
 // проверка на номер команды
-bool check_number(int _num);
+bool CheckNumber(int _num);
 
 // пример готовой программы
-void example_program();
+void ExampleProgram();
 
 // выделение памяти под двумерный массив
 template<class T>
-T** mem_alloc(int _size_x, int _size_y);
+T** MemAlloc(int _size_x, int _size_y);
 
 // ввод и проверка значений
 template<typename T, class FUNC>
-T input_and_check(FUNC,
+T InputAndCheck(FUNC,
 	string welcome_str, string err_str
 	= "Было введено некорректное значение");
 
 // функция ведения диалога с пользователем
-void dialog();
+void Dialog();
 
 // Поиск кратчайшего пути
 void Diykstra(SmejMatr* _sm, int _start_vert);
@@ -148,7 +146,7 @@ int main()
 	SetConsoleOutputCP(1251);
 
 	// запуск диалога
-	dialog();
+	Dialog();
 
 	return 0;
 }
@@ -157,14 +155,14 @@ int main()
 *              Р Е А Л И З А Ц И Я   Ф У Н К Ц И Й              *
 ****************************************************************/
 
-SmejMatr* read_smej_matr_from_file(string _file_path)
+SmejMatr* ReadGraphFromFile(string _file_path)
 {
 	ifstream fin(_file_path);
 
 	// если файл не открылся
 	if (!fin.is_open())
 	{
-		INFO("ЧТЕНИЕ: файл не был открыт");
+		INFO("ЧТЕНИЕ: файл не был открыт (9((");
 		return nullptr;
 	}
 
@@ -195,7 +193,7 @@ SmejMatr* read_smej_matr_from_file(string _file_path)
 	fin.open(_file_path);
 
 	//выделение памяти под матрицу
-	sm->m_smej_matr = mem_alloc<int>(sm->m_numb_of_vertexes, sm->m_numb_of_vertexes);
+	sm->m_smej_matr = MemAlloc<int>(sm->m_numb_of_vertexes, sm->m_numb_of_vertexes);
 	SetMartixValue(sm->m_smej_matr, sm->m_numb_of_vertexes, sm->m_numb_of_vertexes, 0);
 
 	// считываем матрицу смежности
@@ -210,7 +208,7 @@ SmejMatr* read_smej_matr_from_file(string _file_path)
 	return sm;
 }
 
-void print_smej_matr(SmejMatr* _sm)
+void PrintGraph(SmejMatr* _sm)
 {
 	INFO("Матрица смежности");
 	cout << "Количество вершин = " << _sm->m_numb_of_vertexes << endl;
@@ -258,16 +256,16 @@ string ChangeVisitElem(int _elem)
 }
 
 // проверка на номер команды
-bool check_number(int _num)
+bool CheckNumber(int _num)
 {
-	return 0 <= _num && _num <= 14;
+	return 1 <= _num && _num <= 7;
 }
 
 // пример готовой программы
-void example_program()
+void ExampleProgram()
 {
 	// считывание матрицы смежности из файла
-	SmejMatr* sm = read_smej_matr_from_file();
+	SmejMatr* sm = ReadGraphFromFile();
 
 	// позиция, от которой ищется путь
 	int pos = 1;
@@ -276,11 +274,16 @@ void example_program()
 	Diykstra(sm, pos);
 
 	// печать матрицы смежности
-	print_smej_matr(sm);
+	PrintGraph(sm);
+
+	// прима
+	ConverOrientedIntoDisoriened(sm);
+	PrintGraph(sm);
+	Prima(sm, pos);
 }
 
 template<class T = int>
-T** mem_alloc(int _size_x, int _size_y)
+T** MemAlloc(int _size_x, int _size_y)
 {
 	T** arr = new T * [_size_x];
 
@@ -294,7 +297,7 @@ T** mem_alloc(int _size_x, int _size_y)
 
 // ввод и проверка значений
 template<typename T, class FUNC>
-T input_and_check(FUNC _comp,
+T InputAndCheck(FUNC _comp,
 	string welcome_str, string err_str)
 {
 	// размер массива
@@ -315,13 +318,13 @@ T input_and_check(FUNC _comp,
 		cout << err_str << "\n";
 
 		// рекурсивное обращение
-		symb = input_and_check<T, FUNC>(_comp, welcome_str, err_str);
+		symb = InputAndCheck<T, FUNC>(_comp, welcome_str, err_str);
 	}
 	return symb;
 }
 
 // функция ведения диалога с пользователем
-void dialog()
+void Dialog()
 {
 	// переменная содержащая коды действий
 	input_codes in_code;
@@ -332,20 +335,11 @@ void dialog()
 	// матрица смежности
 	SmejMatr* sm = nullptr;
 
-	/* коды комманд
-		exit = 0,
-		template_program,
-		read_matrix,
-		find_short_path_diykstra,
-		create_min_spanning_tree_prim,
-		clear_console
-	*/
-
 	do
 	{
 		// запрос у пользователя следующих действий
 		in_code = input_codes(
-			input_and_check<int>(check_number, command_str)
+			InputAndCheck<int>(CheckNumber, command_str)
 			- 1);
 
 		// запуск соответствующих функций
@@ -355,25 +349,22 @@ void dialog()
 			INFO("Произведен выход");
 			break;
 
-		case input_codes::read_matrix:
-			INFO("Чтение из файла");
-			delete sm;
-			sm = read_smej_matr_from_file();
-			break;
-
 		case input_codes::template_program:
 			INFO("Запуск примера кода");
-			example_program();
+			ExampleProgram();
 			break;
 
 		case input_codes::find_short_path_diykstra:
+			// счтитывание из файла
+			delete sm;
+			sm = ReadGraphFromFile();
 			if (!sm)
 			{
 				INFO("ДИАЛОГ ДЕЙКСТРА: матрица смежности не существует");
 			}
 			else
 			{
-				temp = input_and_check<int>([&sm](int el)
+				temp = InputAndCheck<int>([&sm](int el)
 					{
 						return el >= 1 & el <= sm->m_numb_of_vertexes;
 					},
@@ -391,14 +382,14 @@ void dialog()
 			}
 			else
 			{
-				temp = input_and_check<int>([&sm](int el)
+				temp = InputAndCheck<int>([&sm](int el)
 					{
 						return el >= 1 & el <= sm->m_numb_of_vertexes;
 					},
 					"Введите номер вершины, от которой будет строиться остовное дерево: ",
 						"Номер должен быть в пределах: [1," + to_string(sm->m_numb_of_vertexes) + "]");
 				ConverOrientedIntoDisoriened(sm);
-				print_smej_matr(sm);
+				PrintGraph(sm);
 				Prima(sm, temp-1);
 			}
 			break;
@@ -414,7 +405,7 @@ void dialog()
 			if (!sm) { INFO("ДИАЛОГ ПЕЧАТЬ: матрица смежности не существует"); }
 			else
 			{
-				print_smej_matr(sm);
+				PrintGraph(sm);
 			}
 			break;
 
@@ -611,6 +602,7 @@ void Diykstra(SmejMatr* _sm, int _start_vert)
 
 void Prima(SmejMatr* _sm, int _st)
 {
+	INFO("Алгоритм Прима");
 	// количество вершин
 	int size = _sm->m_numb_of_vertexes;
 
